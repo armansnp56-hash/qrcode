@@ -100,6 +100,7 @@
     <h3>QR Code Ruangan</h3>
     <canvas id="qrCanvas"></canvas><br>
     <button onclick="cetakQR()">🖨 Cetak QR</button>
+    <button onclick="downloadQR()">⬇️ Download QR</button>
     <button onclick="tutupModal()">Tutup</button>
   </div>
 </div>
@@ -223,6 +224,16 @@ function cetakQR() {
   `);
   win.document.close();
 }
+function downloadQR() {
+  let qrImage = qr.toDataURL("image/png");
+  let a = document.createElement("a");
+  a.href = qrImage;
+  a.download = "qr_inventaris.png"; // nama file
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 </script>
 
 </body>
