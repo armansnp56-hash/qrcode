@@ -149,11 +149,59 @@ function tampilkanDataDropdown() {
   }
 
   // Isi QR: ruang + daftar barang
-  let qrText = `Ruang: ${ruang}\n`;
-  barang.forEach((b, i) => {
-    qrText += `${i+1}. ${b['Nama Barang'] || '-'} (${b['Jumlah'] || '-'})\n`;
-  });
-  qr.value = qrText;
+  // let qrText = `Ruang: ${ruang}\n`;
+  // barang.forEach((b, i) => {
+  //   qrText += `${i+1}. ${b['Nama Barang'] || '-'} (${b['Jumlah'] || '-'})\n`;
+  // });
+  // qr.value = qrText;
+  // Isi QR: ruang + tabel barang
+let qrHTML = `
+  <html>
+  <head>
+    <title>Kartu Inventaris - ${ruang}</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding:10px; }
+      h2 { text-align:center; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border:1px solid #000; padding:5px; font-size:12px; }
+      th { background:#eee; }
+    </style>
+  </head>
+  <body>
+    <h2>Ruang: ${ruang}</h2>
+    <table>
+      <tr>
+        <th>No</th>
+        <th>Nama Barang</th>
+        <th>Merk</th>
+        <th>Tahun</th>
+        <th>Jumlah</th>
+        <th>Kondisi</th>
+      </tr>`;
+
+barang.forEach((b, i) => {
+  let kondisi = [];
+  if (b['Keadaan Baik'] && b['Keadaan Baik'] !== '-' && b['Keadaan Baik'] > 0) kondisi.push(`Baik (${b['Keadaan Baik']})`);
+  if (b['Kurang Baik'] && b['Kurang Baik'] !== '-' && b['Kurang Baik'] > 0) kondisi.push(`Kurang Baik (${b['Kurang Baik']})`);
+  if (b['Rusak Berat'] && b['Rusak Berat'] !== '-' && b['Rusak Berat'] > 0) kondisi.push(`Rusak Berat (${b['Rusak Berat']})`);
+  kondisi = kondisi.join(', ') || '-';
+
+  qrHTML += `
+    <tr>
+      <td>${i+1}</td>
+      <td>${b['Nama Barang'] || '-'}</td>
+      <td>${b['Merk'] || '-'}</td>
+      <td>${b['Tahun Pembelian'] || '-'}</td>
+      <td>${b['Jumlah'] || '-'}</td>
+      <td>${kondisi}</td>
+    </tr>`;
+});
+
+qrHTML += `</table></body></html>`;
+
+// encode ke QR
+qr.value = qrHTML;
+
 
   // Buat tabel
   let html = `<h2>Ruang: ${ruang}</h2>
