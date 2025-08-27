@@ -22,14 +22,16 @@
     flex-wrap: wrap;
   }
   select, button {
-    padding: 10px;
+    padding: 10px 15px;
     font-size: 16px;
+    border-radius: 5px;
   }
   button {
     background: #28a745;
     color: white;
     border: none;
     cursor: pointer;
+    transition: 0.3s;
   }
   button:hover {
     background: #218838;
@@ -39,21 +41,41 @@
     width: 100%;
     margin-top: 20px;
     background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
   th, td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 10px;
     text-align: left;
   }
   th {
     background: #e9ecef;
   }
-  #qrcode {
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
     text-align: center;
-    margin: 20px;
+    max-width: 400px;
+  }
+  .modal-content button {
+    margin-top: 10px;
   }
   canvas {
-    margin-top: 10px;
+    margin: 10px 0;
   }
 </style>
 
@@ -70,8 +92,17 @@
   <button onclick="tampilkanDataDropdown()">Tampilkan</button>
 </div>
 
-<div id="qrcode"></div>
 <div id="hasil"></div>
+
+<!-- Modal QR -->
+<div id="qrModal" class="modal">
+  <div class="modal-content">
+    <h3>QR Code Ruangan</h3>
+    <canvas id="qrCanvas"></canvas><br>
+    <button onclick="cetakQR()">🖨 Cetak QR</button>
+    <button onclick="tutupModal()">Tutup</button>
+  </div>
+</div>
 
 <script>
 let dataInventaris = [];
@@ -96,13 +127,12 @@ fetch('data.json')
       select.appendChild(opt);
     });
 
-    // Inisialisasi QR Code
+    // QR generator
     qr = new QRious({
-      element: document.createElement('canvas'),
+      element: document.getElementById("qrCanvas"),
       size: 250,
       value: ""
     });
-    document.getElementById("qrcode").appendChild(qr.element);
   });
 
 function tampilkanDataDropdown() {
@@ -114,18 +144,17 @@ function tampilkanDataDropdown() {
 
   if (barang.length === 0) {
     document.getElementById('hasil').innerHTML = "<p><strong>Data tidak ditemukan.</strong></p>";
-    qr.value = "";
     return;
   }
 
-  // Buat isi QR Code: ruang + daftar barang
+  // Isi QR: ruang + daftar barang
   let qrText = `Ruang: ${ruang}\n`;
   barang.forEach((b, i) => {
     qrText += `${i+1}. ${b['Nama Barang'] || '-'} (${b['Jumlah'] || '-'})\n`;
   });
   qr.value = qrText;
 
-  // Buat tabel HTML
+  // Buat tabel
   let html = `<h2>Ruang: ${ruang}</h2>
               <table>
               <tr>
@@ -155,8 +184,25 @@ function tampilkanDataDropdown() {
   });
   
   html += `</table>
-           <button onclick="window.print()">🖨 Cetak</button>`;
+           <div style="margin-top:15px;">
+             <button onclick="window.print()">🖨 Cetak Tabel</button>
+             <button onclick="bukaModal()">📱 Lihat QR</button>
+           </div>`;
   document.getElementById('hasil').innerHTML = html;
+}
+
+// Modal QR
+function bukaModal() {
+  document.getElementById("qrModal").style.display = "flex";
+}
+function tutupModal() {
+  document.getElementById("qrModal").style.display = "none";
+}
+function cetakQR() {
+  let win = window.open("");
+  win.document.write("<img src='" + qr.toDataURL() + "'/>");
+  win.print();
+  win.close();
 }
 </script>
 
