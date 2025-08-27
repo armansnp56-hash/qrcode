@@ -51,7 +51,6 @@
   th {
     background: #e9ecef;
   }
-  /* Modal */
   .modal {
     display: none;
     position: fixed;
@@ -71,22 +70,17 @@
     text-align: center;
     max-width: 400px;
   }
-  .modal-content button {
-    margin-top: 10px;
-  }
   canvas {
     margin: 10px 0;
   }
 </style>
-
-<!-- Library QR Code -->
 <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
 </head>
 <body>
 
-<h1>Kartu Inventaris Ruangan</h1>
+<h1 id="judul">Kartu Inventaris Ruangan</h1>
 
-<div class="search-box">
+<div class="search-box" id="searchBox">
   <label for="daftarRuang">Pilih Ruang:</label>
   <select id="daftarRuang"></select>
   <button onclick="tampilkanDataDropdown()">Tampilkan</button>
@@ -94,7 +88,6 @@
 
 <div id="hasil"></div>
 
-<!-- Modal QR -->
 <div id="qrModal" class="modal">
   <div class="modal-content">
     <h3>QR Code Ruangan</h3>
@@ -115,7 +108,7 @@ fetch('data.json')
   .then(data => {
     dataInventaris = data;
 
-    // Buat dropdown ruang unik
+    // Isi dropdown
     let ruangUnik = [...new Set(dataInventaris.map(
       item => item['Nama Ruang_y'] || item['Nama Ruang_x'] || '(Tanpa Nama)'
     ))];
@@ -128,19 +121,22 @@ fetch('data.json')
       select.appendChild(opt);
     });
 
-    // QR generator
     qr = new QRious({
       element: document.getElementById("qrCanvas"),
       size: 250,
       value: ""
     });
 
-    // 🔥 Auto-load berdasarkan parameter ?ruang=
+    // Auto load ?ruang=
     const params = new URLSearchParams(window.location.search);
     const ruangParam = params.get("ruang");
     if (ruangParam) {
       document.getElementById('daftarRuang').value = ruangParam;
       tampilkanDataDropdown();
+
+      // 🔥 hide judul + dropdown
+      document.getElementById("judul").style.display = "none";
+      document.getElementById("searchBox").style.display = "none";
     }
   });
 
@@ -156,12 +152,10 @@ function tampilkanDataDropdown() {
     return;
   }
 
-  // 🔗 Isi QR dengan URL ke halaman ini + parameter ruang
   const baseUrl = window.location.origin + window.location.pathname;
   const ruangEncoded = encodeURIComponent(ruang);
   qr.value = `${baseUrl}?ruang=${ruangEncoded}`;
 
-  // Buat tabel
   let html = `<h2>Ruang: ${ruang}</h2>
               <table>
               <tr>
@@ -190,15 +184,19 @@ function tampilkanDataDropdown() {
     </tr>`;
   });
   
-  html += `</table>
-           <div style="margin-top:15px;">
-             <button onclick="window.print()">🖨 Cetak Tabel</button>
-             <button onclick="bukaModal()">📱 Lihat QR</button>
-           </div>`;
+  html += `</table>`;
+
+  // Tampilkan tombol hanya kalau mode normal
+  if (!new URLSearchParams(window.location.search).get("ruang")) {
+    html += `<div style="margin-top:15px;">
+               <button onclick="window.print()">🖨 Cetak Tabel</button>
+               <button onclick="bukaModal()">📱 Lihat QR</button>
+             </div>`;
+  }
+
   document.getElementById('hasil').innerHTML = html;
 }
 
-// Modal QR
 function bukaModal() {
   document.getElementById("qrModal").style.display = "flex";
 }
@@ -234,7 +232,7 @@ function downloadQR() {
   let qrImage = qr.toDataURL("image/png");
   let a = document.createElement("a");
   a.href = qrImage;
-  a.download = "qr_inventaris.png"; // nama file
+  a.download = "qr_inventaris.png";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
