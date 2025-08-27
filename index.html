@@ -21,7 +21,7 @@
     margin-top: 20px;
     flex-wrap: wrap;
   }
-  select, input, button {
+  select, button {
     padding: 10px;
     font-size: 16px;
   }
@@ -99,7 +99,7 @@ fetch('data.json')
     // Inisialisasi QR Code
     qr = new QRious({
       element: document.createElement('canvas'),
-      size: 200,
+      size: 250,
       value: ""
     });
     document.getElementById("qrcode").appendChild(qr.element);
@@ -114,12 +114,18 @@ function tampilkanDataDropdown() {
 
   if (barang.length === 0) {
     document.getElementById('hasil').innerHTML = "<p><strong>Data tidak ditemukan.</strong></p>";
+    qr.value = "";
     return;
   }
 
-  // update QR Code dengan nama ruang
-  qr.value = ruang;
+  // Buat isi QR Code: ruang + daftar barang
+  let qrText = `Ruang: ${ruang}\n`;
+  barang.forEach((b, i) => {
+    qrText += `${i+1}. ${b['Nama Barang'] || '-'} (${b['Jumlah'] || '-'})\n`;
+  });
+  qr.value = qrText;
 
+  // Buat tabel HTML
   let html = `<h2>Ruang: ${ruang}</h2>
               <table>
               <tr>
