@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kartu Inventaris Ruangan</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f7f7f7;
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  .search-box {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  input, button {
+    padding: 10px;
+    font-size: 16px;
+  }
+  button {
+    background: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #218838;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+    background: white;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  th {
+    background: #e9ecef;
+  }
+  @media (max-width: 600px) {
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+    tr {
+      margin-bottom: 10px;
+    }
+    td {
+      border: none;
+      padding: 5px 0;
+    }
+    td::before {
+      font-weight: bold;
+      display: block;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Kartu Inventaris Ruangan</h1>
+<div class="search-box">
+  <input type="text" id="kodeRuang" placeholder="Masukkan / Scan Kode Ruang">
+  <button onclick="tampilkanData()">Cari</button>
+</div>
+<div id="hasil"></div>
+
+<script>
+let dataInventaris = [];
+
+// Load data.json
+fetch('data.json')
+  .then(res => res.json())
+  .then(data => dataInventaris = data);
+
+function tampilkanData() {
+  let kode = document.getElementById('kodeRuang').value.trim();
+  let barang = dataInventaris.filter(item => item['Kode Ruang'] === kode);
+
+  if (barang.length === 0) {
+    document.getElementById('hasil').innerHTML = "<p><strong>Data tidak ditemukan.</strong></p>";
+    return;
+  }
+
+  let namaRuang = barang[0]['Nama Ruang'] || '(Tanpa Nama)';
+  let html = `<h2>Ruang: ${namaRuang}</h2>
+              <table>
+              <tr>
+                <th>No</th>
+                <th>Nama Barang</th>
+                <th>Merk</th>
+                <th>Tahun Pembelian</th>
+                <th>Jumlah</th>
+                <th>Kondisi</th>
+              </tr>`;
+  
+  barang.forEach((b, i) => {
+    let kondisi = b['Keadaan Baik'] > 0 ? 'Baik' :
+                  b['Kurang Baik'] > 0 ? 'Kurang Baik' : 'Rusak Berat';
+    html += `<tr>
+      <td>${i+1}</td>
+      <td>${b['Nama Barang'] || '-'}</td>
+      <td>${b['Merk'] || '-'}</td>
+      <td>${b['Tahun Pembelian'] || '-'}</td>
+      <td>${b['Jumlah'] || '-'}</td>
+      <td>${kondisi}</td>
+    </tr>`;
+  });
+  
+  html += `</table>
+           <button onclick="window.print()">🖨 Cetak</button>`;
+  document.getElementById('hasil').innerHTML = html;
+}
+</script>
+
+</body>
+</html>
