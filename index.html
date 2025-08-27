@@ -199,10 +199,29 @@ function tutupModal() {
   document.getElementById("qrModal").style.display = "none";
 }
 function cetakQR() {
-  let win = window.open("");
-  win.document.write("<img src='" + qr.toDataURL() + "'/>");
-  win.print();
-  win.close();
+  let qrImage = qr.toDataURL();
+  let win = window.open("", "_blank");
+  win.document.write(`
+    <html>
+    <head>
+      <title>Cetak QR Code</title>
+      <style>
+        body { text-align: center; margin-top: 50px; }
+        img { width: 300px; height: 300px; }
+      </style>
+    </head>
+    <body>
+      <h2>QR Code Inventaris</h2>
+      <img src="${qrImage}" alt="QR Code"/>
+      <script>
+        window.onload = function() {
+          window.print();
+        }
+      <\/script>
+    </body>
+    </html>
+  `);
+  win.document.close();
 }
 </script>
 
