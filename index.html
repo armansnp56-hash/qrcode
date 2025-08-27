@@ -48,31 +48,17 @@
   th {
     background: #e9ecef;
   }
-  #reader {
-    width: 300px;
-    margin: 20px auto;
-    display: none;
+  #qrcode {
+    text-align: center;
+    margin: 20px;
   }
-  @media (max-width: 600px) {
-    table, thead, tbody, th, td, tr {
-      display: block;
-    }
-    tr {
-      margin-bottom: 10px;
-    }
-    td {
-      border: none;
-      padding: 5px 0;
-    }
-    td::before {
-      font-weight: bold;
-      display: block;
-    }
+  canvas {
+    margin-top: 10px;
   }
 </style>
 
-<!-- Library untuk QR Code Scanner -->
-<script src="https://unpkg.com/html5-qrcode"></script>
+<!-- Library QR Code -->
+<script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
 </head>
 <body>
 
@@ -82,14 +68,14 @@
   <label for="daftarRuang">Pilih Ruang:</label>
   <select id="daftarRuang"></select>
   <button onclick="tampilkanDataDropdown()">Tampilkan</button>
-  <button onclick="startScan()">📷 Scan QR</button>
 </div>
-<div id="reader"></div>
 
+<div id="qrcode"></div>
 <div id="hasil"></div>
 
 <script>
 let dataInventaris = [];
+let qr;
 
 // Load data.json
 fetch('data.json')
@@ -109,6 +95,14 @@ fetch('data.json')
       opt.textContent = r;
       select.appendChild(opt);
     });
+
+    // Inisialisasi QR Code
+    qr = new QRious({
+      element: document.createElement('canvas'),
+      size: 200,
+      value: ""
+    });
+    document.getElementById("qrcode").appendChild(qr.element);
   });
 
 function tampilkanDataDropdown() {
@@ -122,6 +116,9 @@ function tampilkanDataDropdown() {
     document.getElementById('hasil').innerHTML = "<p><strong>Data tidak ditemukan.</strong></p>";
     return;
   }
+
+  // update QR Code dengan nama ruang
+  qr.value = ruang;
 
   let html = `<h2>Ruang: ${ruang}</h2>
               <table>
@@ -154,29 +151,6 @@ function tampilkanDataDropdown() {
   html += `</table>
            <button onclick="window.print()">🖨 Cetak</button>`;
   document.getElementById('hasil').innerHTML = html;
-}
-
-// Fungsi scan QR
-function startScan() {
-  document.getElementById("reader").style.display = "block";
-  const reader = new Html5Qrcode("reader");
-
-  reader.start(
-    { facingMode: "environment" }, 
-    { fps: 10, qrbox: 250 },
-    qrCodeMessage => {
-      // isi QR di-set ke dropdown
-      document.getElementById("daftarRuang").value = qrCodeMessage;
-      reader.stop(); // hentikan kamera
-      document.getElementById("reader").style.display = "none";
-      tampilkanDataDropdown(); // langsung tampilkan data
-    },
-    errorMessage => {
-      // error scanning diabaikan
-    }
-  ).catch(err => {
-    console.error("Scan gagal:", err);
-  });
 }
 </script>
 
